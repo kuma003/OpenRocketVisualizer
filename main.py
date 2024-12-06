@@ -1,47 +1,48 @@
 import pygame as pg
 import orhelper
+import src.scene as scene
 
-class AppMain:
-    def __init__(self) -> None:
-        pg.init()
-        info = pg.display.Info()
-        screen_width, screen_height = info.current_w, info.current_h 
+# class AppMain:
+#     def __init__(self) -> None:
+#         pg.init()
+#         info = pg.display.Info()
+#         screen_width, screen_height = info.current_w, info.current_h 
 
-        # self.screen = pg.display.set_mode((screen_width, screen_height), pg.FULLSCREEN)
-        self.screen = pg.display.set_mode((screen_width//2, screen_height//2))
+#         # self.screen = pg.display.set_mode((screen_width, screen_height), pg.FULLSCREEN)
+#         self.screen = pg.display.set_mode((screen_width//2, screen_height//2))
 
-    def update(self) -> None:
-        pass # 空実装
+#     def update(self) -> None:
+#         pass # 空実装
     
-    def draw(self) -> None:
-        self.screen.fill(pg.Color("blue"))
-        pg.display.update()
+#     def draw(self) -> None:
+#         self.screen.fill(pg.Color("blue"))
+#         pg.display.update()
     
     
-    def run(self) -> None:
-        clock = pg.time.Clock()
+#     def run(self) -> None:
+#         clock = pg.time.Clock()
         
-        while True:
-            # main loop
-            fps = 60
-            clock.tick(fps)
+#         while True:
+#             # main loop
+#             fps = 60
+#             clock.tick(fps)
             
-            should_quit = False
+#             should_quit = False
             
-            for event in pg.event.get():
-                if event.type == pg.QUIT:
-                    should_quit = True
-                if event.type == pg.KEYDOWN:
-                    if event.key == pg.K_ESCAPE:
-                        should_quit = True
+#             for event in pg.event.get():
+#                 if event.type == pg.QUIT:
+#                     should_quit = True
+#                 if event.type == pg.KEYDOWN:
+#                     if event.key == pg.K_ESCAPE:
+#                         should_quit = True
             
-            if should_quit:
-                break
-            self.update()
-            self.draw()
+#             if should_quit:
+#                 break
+#             self.update()
+#             self.draw()
 
 if __name__ == "__main__":
-    app = AppMain()
+    app = scene.AppMain()
     app.run()
     
     

@@ -4,6 +4,9 @@ from abc import ABCMeta, abstractmethod
 import enum
 
 class SCENE_STATE(enum.Enum):
+    """
+        enum class for scene state.
+    """
     TOP = 0
     BRIEFING = 1
     GAME = 2
@@ -43,19 +46,17 @@ class Top:
         Top scene of the game. This Scene is the first scene to be displayed when the game starts.
     """
     COLOR_BACKGROUND = pg.Color(0xFA, 0xFC, 0xFF) # background color of the scene.
+    COLOR_ICON  = pg.Color(0xD0, 0xD0, 0xD0) # color of the icon.
     ICON_FTE = pg.image.load( "img/FTE.png") # F.T.E. icon image.
     
     def __init__(self) -> None:
         fte_icon_arr = pg.surfarray.pixels3d(Top.ICON_FTE)
         fte_icon_alpha = pg.surfarray.pixels_alpha(Top.ICON_FTE)
         mask = fte_icon_alpha > 0
-        fte_icon_arr[mask] = (0, 0, 0)
+        fte_icon_arr[mask] = self.COLOR_ICON[:3]
         
         self.ICON_FTE = pg.Surface(Top.ICON_FTE.get_size(), pg.SRCALPHA)
         pg.surfarray.blit_array(self.ICON_FTE, fte_icon_arr)
-        
-        self.ICON_FTE = self.ICON_FTE.convert_alpha()
-        pg.surfarray.pixels_alpha(self.ICON_FTE)[:] = 32
             
     def exec(self, scene: pg.surface) -> None:
         """
@@ -76,6 +77,7 @@ class Top:
             fte_icon = pg.transform.scale(Top.ICON_FTE, (screen_height, screen_height))
         
         scene.fill(Top.COLOR_BACKGROUND)
-        scene.blit(fte_icon, (0 if screen_height > screen_width else (screen_width - screen_height)//2 , 0 if screen_width > screen_height else (screen_height - screen_width)//2))
+        scene.blit(fte_icon, (0 if screen_height > screen_width else (screen_width - screen_height)//2 ,
+                              0 if screen_width > screen_height else (screen_height - screen_width)//2))
         pg.display.update()
         return SCENE_STATE.TOP

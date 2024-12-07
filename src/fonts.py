@@ -11,10 +11,10 @@ class Fonts:
             font_list (dict[str, str]): the dictionary of fonts that can be used in the game. The key is the name of the font, and the value is the github URL of the font file. you can add more fonts to the font_list by adding the font name and the URL of the font file.
     """
     font_list = {
-        "ZenMaruGothic": "https://github.com/googlefonts/zen-marugothic/blob/main/fonts/ttf/ZenMaruGothic-Regular.ttf",
+        "ZenMaruGothic": "https://github.com/googlefonts/zen-marugothic/raw/refs/heads/main/fonts/ttf/ZenMaruGothic-Regular.ttf",
     }
     
-    __fonts : dict[str, pg.font.Font] = {}
+    __FONT_DIR = "./fonts"
     
     @classmethod
     def initialize(cls) -> None:
@@ -24,7 +24,7 @@ class Fonts:
         pg.font.init() 
     
     @classmethod
-    def get_font(cls, font_name : str):
+    def get_font(cls, font_name : str, font_size : int = 32) -> pg.font.Font:
         """
             Get the font object by the font name.
 
@@ -34,16 +34,20 @@ class Fonts:
             Returns:
                 pg.font.Font: the font object.
         """
-        return cls.__fonts.get(font_name)
+        if os.path.exists(os.path.join(cls.__FONT_DIR, f"{font_name}.ttf")):
+            return pg.font.Font(os.path.join(cls.__FONT_DIR, f"{font_name}.ttf"), font_size)
+        else:
+            print(f"Font {font_name} is not found. Make sure you have downloaded the font via 'download_fonts'.")
+            return None
     
     @classmethod
     def download_fonts(cls):
         """
             Download the fonts. This method downloads the fonts from the internet and saves them in the "./fonts" directory.
         """
-        os.makedirs("./fonts", exist_ok=True)
+        os.makedirs(cls.__FONT_DIR, exist_ok=True)
         for font_name, font_url in cls.font_list.items():
-            if font_name in cls.__fonts:
+            if os.path.exists(os.path.join(cls.__FONT_DIR, f"{font_name}.ttf")):
                 # no need to download the font if it's already downloaded
                 continue
             
@@ -57,10 +61,9 @@ class Fonts:
                 else:
                     print(f"Failed to download {font_name}")
                     continue
-            cls.__fonts[font_name] = pg.font.Font(save_path, 32)
 
 Fonts.initialize() # initialize the fonts
+Fonts.download_fonts() # download the fonts
 
 if __name__ == "__main__":
-    Fonts.download_fonts()
     print(Fonts.get_font("ZenMaruGothic"))

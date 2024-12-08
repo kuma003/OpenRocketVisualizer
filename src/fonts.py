@@ -1,11 +1,11 @@
-"""font."""
+"""font.py"""
 import requests
 import os
 import pygame as pg
 
 class Fonts:
     """
-        Font manager class. This class manages the fonts used in the game.
+        Font manager class.
 
         Attributes:
             font_list (dict[str, str]): the dictionary of fonts that can be used in the game. The key is the name of the font, and the value is the github URL of the font file. you can add more fonts to the font_list by adding the font name and the URL of the font file.

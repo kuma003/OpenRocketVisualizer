@@ -41,8 +41,8 @@ class AppMain:
             else:
                 break
 
-def load_transparent_img(filename : str, filled_color : pg.color):
-    img = pg.image.load(filename)
+def load_transparent_img(filename: str, filled_color: pg.Color) -> pg.Surface:
+    img = pg.image.load(filename).convert_alpha()
 
     img_arr = pg.surfarray.pixels3d(img)
     img_alpha = pg.surfarray.pixels_alpha(img)
@@ -52,9 +52,9 @@ def load_transparent_img(filename : str, filled_color : pg.color):
     filled_img = pg.Surface(img.get_size(), pg.SRCALPHA)
     pg.surfarray.blit_array(filled_img, img_arr)
 
-    # アルファチャンネルを設定
-    alpha_arr = pg.surfarray.pixels_alpha(filled_img)
-    alpha_arr[mask] = img_alpha[mask]
+    # # アルファチャンネルを設定
+    # alpha_arr = pg.surfarray.pixels_alpha(filled_img)
+    # alpha_arr[mask] = img_alpha[mask]
 
     return filled_img
 
@@ -62,7 +62,7 @@ class Top:
     """
         Top scene of the game. This Scene is the first scene to be displayed when the game starts.
     """
-    COLOR_BACKGROUND = pg.Color(0xFA, 0xFC, 0xFF) # background color of the scene.
+    COLOR_BACKGROUND = pg.Color(0x0, 0xFC, 0xFF) # background color of the scene.
     COLOR_ICON  = pg.Color(0xD0, 0xD0, 0xD0) # color of the icon.
     # ICON_FTE = load_transparent_img("img/FTE.png", COLOR_ICON) # F.T.E. icon image.
     ICON_FTE = None

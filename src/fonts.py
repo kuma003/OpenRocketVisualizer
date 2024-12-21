@@ -45,22 +45,24 @@ class Fonts:
         """
             Download the fonts. This method downloads the fonts from the internet and saves them in the "./fonts" directory.
         """
+        print("Checking fonts...")
         os.makedirs(cls.__FONT_DIR, exist_ok=True)
         for font_name, font_url in cls.font_list.items():
             if os.path.exists(os.path.join(cls.__FONT_DIR, f"{font_name}.ttf")):
                 # no need to download the font if it's already downloaded
                 continue
-            
+            print(f"{font_name} is not found. Downloading...", end="")
             # download font
             response = requests.get(font_url)
             save_path = os.path.join("fonts", f"{font_name}.ttf")
             with open(save_path, 'wb') as file:
                 if response.status_code == 200:
                     file.write(response.content)
-                    print(f"Downloaded {font_name}")
+                    print("Done.")
                 else:
-                    print(f"Failed to download {font_name}")
+                    print("Failed (status code: {response.status_code}).")
                     continue
+        print("All fonts are ready.")
 
 Fonts.initialize() # initialize the fonts
 Fonts.download_fonts() # download the fonts

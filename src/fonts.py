@@ -30,6 +30,7 @@ class Fonts:
 
             Args:
                 font_name (str): the name of the font.
+                font_size (int): the size of the font.
 
             Returns:
                 pg.font.Font: the font object.

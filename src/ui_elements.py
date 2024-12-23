@@ -1,6 +1,7 @@
 import pygame as pg
 import numpy as np
 from src.fonts import Fonts
+import src.config as cfg
 
 def load_transparent_img(filename: str, filled_color: pg.Color) -> pg.Surface:
     '''
@@ -33,7 +34,7 @@ class BackgruondLogo():
     '''Background F.T.E. logo image'''
     def __init__(self):
         super().__init__()
-        self.row_image = load_transparent_img("img/FTE.png", pg.Color(0xD0, 0xD0, 0xD0))
+        self.row_image = load_transparent_img("img/FTE.png", cfg.COLOR_PALE_GRAY)
         self.image = None
         self.window_size = None
         self.blit_dest = None
@@ -102,7 +103,7 @@ class Button(pg.sprite.Sprite):
         screen.blit(self.image, self.rect)
 
 class UI_Text(pg.sprite.Sprite):
-    def __init__(self, text: str, font_name: str, font_size: float, font_color: pg.Color, pos: tuple[float, float], debug_collision_rect: bool = False) -> None:
+    def __init__(self, text: str, font_name: str, font_size: float, font_color: pg.Color, pos: tuple[float, float], centering: bool, debug_collision_rect: bool = False) -> None:
         '''
         UI Text class
 
@@ -125,6 +126,7 @@ class UI_Text(pg.sprite.Sprite):
         self.rect: pg.Rect                   = None
         self.font_size: float                = font_size / 100
         self.on_click: callable              = lambda: None
+        self.centering: bool                 = centering
         self.debug_collision_rect            = debug_collision_rect
     
     def set_callback(self, callback) -> None:
@@ -143,13 +145,15 @@ class UI_Text(pg.sprite.Sprite):
             font_size = int(self.window_size[0] * self.font_size)
             pos = [int(self.window_size[0] * self.pos[0]), int(self.window_size[1] * self.pos[1])]
             font =  Fonts.get_font(self.font_name, font_size)
-            font.set_bold(True)
-            self.rendered_text = font.render(self.text, True, self.font_color)
+            self.rendered_text = pg.sprite.Group()
+            for line in self.text.split("\n"):
+                self.rendered_text.add(font.render(line, True, self.font_color))
             ascent = font.get_ascent()
             descent = font.get_descent()
             height = font.get_height()
-            self.rect = pg.Rect(pos[0], pos[1] + descent, self.rendered_text.get_width(), ascent)
-        
+            self.rect = pg.Rect(pos[0], pos[1] + descent, self.rendered_text.get_width(), self.rendered_text.get_height())
+            if self.centering:
+                self.rect.x -= self.rect.width // 2
     
     def event_handler(self, event: pg.event.Event) -> None:
             if event.type == pg.MOUSEBUTTONDOWN:

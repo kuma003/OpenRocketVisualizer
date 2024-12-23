@@ -53,14 +53,17 @@ class Top:
     
     def __init__(self) -> None:
         self.FTE_icon = ui_elements.BackgruondLogo()
-        self.settings_button = ui_elements.Button(ui_elements.load_transparent_img("img/settings.png", cfg.COLOR_GRAY1), (0, 0), 2.5)
+        self.settings_button = ui_elements.Button(ui_elements.load_transparent_img("img/settings.png", cfg.COLOR_GRAY1), (0, 0), 4)
         self.settings_button.set_callback(lambda : print("settings"))
-        self.settings_message = ui_elements.UI_Text("Settings", "ZenMaruGothic", 2.5, cfg.COLOR_GRAY1, (2.5, 0))
-        self.settings_message.set_callback(lambda : print("Configurations"))
+        # self.settings_message = ui_elements.UI_Text("Settings", "ZenKakuGothic", 3, cfg.COLOR_GRAY1, (4, 2), True)
+        # self.settings_message.set_callback(lambda : print("Configurations"))
+
+        self.oepn_file_text = ui_elements.UI_Text("orkファイルを開く / Open ork File", "ZenKakuGothic", 3.75, cfg.COLOR_BLACK, (50, 75), True)
         
-        self.copyright = Fonts.get_font("ZenMaruGothic", 15).render(cfg.TEXT_COPYRIGHT, True, cfg.COLOR_GRAY1)
-    
-    
+        self.title = ui_elements.UI_Text("From The Earth\nOpenRocket\nVisualizer", "oswald", 10, cfg.COLOR_BLACK, (50, 25), True)
+        
+        self.copyright = Fonts.get_font("oswald", 15).render(cfg.TEXT_COPYRIGHT, True, cfg.COLOR_GRAY1)
+
     def exec(self, scene: pg.surface) -> None:
         """
             Execute the scene.
@@ -69,13 +72,14 @@ class Top:
         screen_width, screen_height = scene.get_width(), scene.get_height()
         
         # fill the screen background
-        scene.fill(cfg.COLOR_PALE_WHITE)
+        scene.fill(cfg.COLOR_PALE_WHITE1)
         
         # update
         self.FTE_icon.update()
         self.settings_button.update()
-        self.settings_message.update()
-        
+        # self.settings_message.update()
+        self.title.update()
+        self.oepn_file_text.update()
         
         for event in pg.event.get():
             if event.type == pg.QUIT:
@@ -84,13 +88,15 @@ class Top:
                 if event.key == pg.K_ESCAPE:
                     return SCENE_STATE.QUIT
             self.settings_button.event_handler(event)
-            self.settings_message.event_handler(event)
+            # self.settings_message.event_handler(event)
         
         # draw
         self.FTE_icon.draw(scene)
         self.settings_button.draw(scene)
-        self.settings_message.draw(scene)
-        
+        # self.settings_message.draw(scene)
+        self.oepn_file_text.draw(scene)
+        self.title.draw(scene)
+
         scene.blit(self.copyright, (screen_width - self.copyright.get_width(), screen_height - self.copyright.get_height()))
         
         

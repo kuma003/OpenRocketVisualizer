@@ -11,7 +11,8 @@ class Fonts:
             font_list (dict[str, str]): the dictionary of fonts that can be used in the game. The key is the name of the font, and the value is the github URL of the font file. you can add more fonts to the font_list by adding the font name and the URL of the font file.
     """
     font_list = {
-        "ZenMaruGothic": "https://github.com/googlefonts/zen-marugothic/raw/refs/heads/main/fonts/ttf/ZenMaruGothic-Regular.ttf",
+        "ZenKakuGothic": "https://github.com/googlefonts/zen-kakugothic/raw/refs/heads/main/fonts/ttf/ZenKakuGothicAntique-Medium.ttf",
+        "oswald": "https://github.com/vernnobile/OswaldFont/raw/refs/heads/master/3.0/Roman/400/Oswald-Regular.ttf"
     }
     
     __FONT_DIR = "./fonts"

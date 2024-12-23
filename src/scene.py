@@ -4,6 +4,10 @@ import numpy as np
 from abc import ABCMeta, abstractmethod
 import enum
 from src.fonts import Fonts
+import src.ui_elements as ui_elements
+import src.config as cfg
+
+pg.init()
 
 class SCENE_STATE(enum.Enum):
     """
@@ -17,7 +21,6 @@ class SCENE_STATE(enum.Enum):
 
 class AppMain:
     def __init__(self) -> None:
-        pg.init()
         info = pg.display.Info()
         screen_width, screen_height = info.current_w, info.current_h 
 
@@ -41,66 +44,56 @@ class AppMain:
             else:
                 break
 
-def load_transparent_img(filename: str, filled_color: pg.Color) -> pg.Surface:
-    img = pg.image.load(filename).convert_alpha()
 
-    img_arr = pg.surfarray.pixels3d(img)
-    img_alpha = pg.surfarray.pixels_alpha(img)
-    mask = img_alpha > 0
-    img_arr[mask] = filled_color[:3]
-
-    filled_img = pg.Surface(img.get_size(), pg.SRCALPHA)
-    pg.surfarray.blit_array(filled_img, img_arr)
-
-    # # アルファチャンネルを設定
-    # alpha_arr = pg.surfarray.pixels_alpha(filled_img)
-    # alpha_arr[mask] = img_alpha[mask]
-
-    return filled_img
 
 class Top:
     """
         Top scene of the game. This Scene is the first scene to be displayed when the game starts.
     """
-    COLOR_BACKGROUND = pg.Color(0x0, 0xFC, 0xFF) # background color of the scene.
-    COLOR_ICON  = pg.Color(0xD0, 0xD0, 0xD0) # color of the icon.
-    # ICON_FTE = load_transparent_img("img/FTE.png", COLOR_ICON) # F.T.E. icon image.
-    ICON_FTE = None
-    COPYRIGHT_TEXT = Fonts.get_font("ZenMaruGothic", 15).render("@2024 From The Earth.", True, pg.Color(0xC0, 0xC0, 0xC0))
     
     def __init__(self) -> None:
-        # self.ICON_FTE = fill_image()
-        # fte_icon_arr = pg.surfarray.pixels3d(Top.ICON_FTE)
-        # fte_icon_alpha = pg.surfarray.pixels_alpha(Top.ICON_FTE)
-        # mask = fte_icon_alpha > 0
-        # fte_icon_arr[mask] = self.COLOR_ICON[:3]
+        self.FTE_icon = ui_elements.BackgruondLogo()
+        self.settings_button = ui_elements.Button(ui_elements.load_transparent_img("img/settings.png", cfg.COLOR_GRAY1), (0, 0), 2.5)
+        self.settings_button.set_callback(lambda : print("settings"))
+        self.settings_message = ui_elements.UI_Text("Settings", "ZenMaruGothic", 2.5, cfg.COLOR_GRAY1, (2.5, 0))
+        self.settings_message.set_callback(lambda : print("Configurations"))
         
-        # self.ICON_FTE = pg.Surface(Top.ICON_FTE.get_size(), pg.SRCALPHA)
-        # pg.surfarray.blit_array(self.ICON_FTE, fte_icon_arr)
-        # self.ICON_FTE = load_transparent_img("img/FTE.png", self.COLOR_ICON) 
-        Top.ICON_FTE = load_transparent_img("img/FTE.png", self.COLOR_ICON)
-        pass
-
+        self.copyright = Fonts.get_font("ZenMaruGothic", 15).render(cfg.TEXT_COPYRIGHT, True, cfg.COLOR_GRAY1)
+    
+    
     def exec(self, scene: pg.surface) -> None:
         """
             Execute the scene.
         """
+        
+        screen_width, screen_height = scene.get_width(), scene.get_height()
+        
+        # fill the screen background
+        scene.fill(cfg.COLOR_PALE_WHITE)
+        
+        # update
+        self.FTE_icon.update()
+        self.settings_button.update()
+        self.settings_message.update()
+        
+        
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 return SCENE_STATE.QUIT
             if event.type == pg.KEYDOWN:
                 if event.key == pg.K_ESCAPE:
                     return SCENE_STATE.QUIT
+            self.settings_button.event_handler(event)
+            self.settings_message.event_handler(event)
         
-        screen_width, screen_height = scene.get_width(), scene.get_height()
-        if screen_height > screen_width:
-            fte_icon = pg.transform.scale(Top.ICON_FTE, (screen_width, screen_width))
-        else:
-            fte_icon = pg.transform.scale(Top.ICON_FTE, (screen_height, screen_height))
+        # draw
+        self.FTE_icon.draw(scene)
+        self.settings_button.draw(scene)
+        self.settings_message.draw(scene)
         
-        scene.fill(Top.COLOR_BACKGROUND)
-        scene.blit(fte_icon, (0 if screen_height > screen_width else (screen_width - screen_height)//2 ,
-                              0 if screen_width > screen_height else (screen_height - screen_width)//2))
-        scene.blit(self.COPYRIGHT_TEXT, (screen_width - self.COPYRIGHT_TEXT.get_width(), screen_height - self.COPYRIGHT_TEXT.get_height()))
+        scene.blit(self.copyright, (screen_width - self.copyright.get_width(), screen_height - self.copyright.get_height()))
+        
+        
+        
         pg.display.update()
         return SCENE_STATE.TOP

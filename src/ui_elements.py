@@ -103,7 +103,7 @@ class Button(pg.sprite.Sprite):
         screen.blit(self.image, self.rect)
 
 class UI_Text(pg.sprite.Sprite):
-    def __init__(self, text: str, font_name: str, font_size: float, font_color: pg.Color, pos: tuple[float, float], centering: bool, debug_collision_rect: bool = False) -> None:
+    def __init__(self, text: str, font_name: str, font_size: float, font_color: pg.Color, pos: tuple[float, float], centering: bool, line_height: float = 1.0, debug_collision_rect: bool = False) -> None:
         '''
         UI Text class
 
@@ -113,21 +113,24 @@ class UI_Text(pg.sprite.Sprite):
             font_size (float): The size of the font as a percentage of the window width.
             font_color (pg.Color): The color of the font.
             pos (tuple[float, float]): The position of the text as a percentage of the window size.
+            centering (bool): Whether to center the text.
+            line_height (float): The height of each line.
             debug_collision_rect (bool): Whether to draw the collision rect for debugging.
         '''
         super().__init__()
-        self.rendered_text: pg.Surface       = None
+        self.rendered_text: list[pg.Surface] = None
         self.text: str                       = text
         self.font_name: str                  = font_name
         self.font_color: pg.Color            = font_color
         self.pos: tuple[float, float]        = [pos[0]/100, pos[1]/100]
         self.window_size: tuple[int, int]    = None
         self.image: pg.Surface               = None
-        self.rect: pg.Rect                   = None
+        self.rects: list[pg.Rect]            = None
         self.font_size: float                = font_size / 100
         self.on_click: callable              = lambda: None
         self.centering: bool                 = centering
-        self.debug_collision_rect            = debug_collision_rect
+        self.line_height: float              = line_height
+        self.debug_collision_rect: bool      = debug_collision_rect
     
     def set_callback(self, callback) -> None:
         '''Set the function to be called when the text is clicked'''
@@ -145,25 +148,27 @@ class UI_Text(pg.sprite.Sprite):
             font_size = int(self.window_size[0] * self.font_size)
             pos = [int(self.window_size[0] * self.pos[0]), int(self.window_size[1] * self.pos[1])]
             font =  Fonts.get_font(self.font_name, font_size)
-            self.rendered_text = pg.sprite.Group()
-            for line in self.text.split("\n"):
-                self.rendered_text.add(font.render(line, True, self.font_color))
-            ascent = font.get_ascent()
-            descent = font.get_descent()
-            height = font.get_height()
-            self.rect = pg.Rect(pos[0], pos[1] + descent, self.rendered_text.get_width(), self.rendered_text.get_height())
+            self.rendered_text = [font.render(line, True, self.font_color) for line in self.text.split("\n")] # list of rendered text lines
+            ascent = font.get_ascent() # length of the text above the baseline
+            descent = font.get_descent() # length of the text below the baseline
+            height = font.get_height() # total height of the text
+            linesize = font.get_linesize() # height of a line of text
+            
+            self.rects = [pg.Rect(pos[0], pos[1] + i * linesize * self.line_height, text.get_width(), linesize) for i, text in enumerate(self.rendered_text)]
             if self.centering:
-                self.rect.x -= self.rect.width // 2
+                for rect in self.rects:
+                    rect.x -= rect.width // 2
     
     def event_handler(self, event: pg.event.Event) -> None:
-            if event.type == pg.MOUSEBUTTONDOWN:
-                if self.rect.collidepoint(event.pos):
+        if event.type == pg.MOUSEBUTTONDOWN:
+            for rect in self.rects:
+                if rect.collidepoint(event.pos):
                     self.on_click()
     
     def draw(self, screen: pg.Surface) -> None:
         '''Draw the text on the screen'''
         if self.debug_collision_rect:
-            pg.draw.rect(screen, pg.Color("red"), self.rect)
-        screen.blit(self.rendered_text, self.rect)
-    
-    
+            for rect in self.rects:
+                pg.draw.rect(screen, pg.Color("red"), rect, 2)
+        for text, rect in zip(self.rendered_text, self.rects):
+            screen.blit(text, rect)

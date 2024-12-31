@@ -45,13 +45,10 @@ class AppMain:
             else:
                 break
 
-
-
 class Top:
     """
         Top scene of the game. This Scene is the first scene to be displayed when the game starts.
-    """
-    
+    """    
     def __init__(self) -> None:
         self.orkFile: str = ""
         self.FTE_icon = ui_elements.BackgruondLogo()
@@ -76,8 +73,6 @@ class Top:
         if self.orkFile:
             return SCENE_STATE.BRIEFING
         
-        screen_width, screen_height = scene.get_width(), scene.get_height()
-        
         # fill the screen background
         scene.fill(cfg.COLOR_PALE_WHITE1)
         
@@ -97,7 +92,6 @@ class Top:
                     return SCENE_STATE.QUIT
             self.settings_button.event_handler(event)
             self.oepn_file_text.event_handler(event)
-            # self.settings_message.event_handler(event)
         
         # draw
         self.FTE_icon.draw(scene)

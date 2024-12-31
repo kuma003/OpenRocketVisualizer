@@ -103,7 +103,7 @@ class Button(pg.sprite.Sprite):
         screen.blit(self.image, self.rect)
 
 class UI_Text(pg.sprite.Sprite):
-    def __init__(self, text: str, font_name: str, font_size: float, font_color: pg.Color, pos: tuple[float, float], centering: bool, line_height: float = 1.0, debug_collision_rect: bool = False) -> None:
+    def __init__(self, text: str, font_name: str, font_size: float, font_color: pg.Color, pos: tuple[float, float], centering: bool = False, line_height: float = 1.0, debug_collision_rect: bool = False) -> None:
         '''
         UI Text class
 

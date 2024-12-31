@@ -27,7 +27,7 @@ class AppMain:
 
         # self.screen = pg.display.set_mode((screen_width, screen_height), pg.FULLSCREEN)
         self.screen = pg.display.set_mode((screen_width//2, screen_height//2))
-        pg.display.set_caption("F.T.E. OpenRocket Flight Visualizer")
+        pg.display.set_caption("F.T.E. OpenRocket Visualizer")
         pg.display.set_icon(pg.image.load("img/ろけにゃん_ロケット.png"))        
         self.top = Top()
                 
@@ -64,7 +64,7 @@ class Top:
         self.oepn_file_text.set_callback(open_ork_file)
         self.title = ui_elements.UI_Text("From The Earth\nOpenRocket Visualizer", "oswald", 7.5, cfg.COLOR_BLACK, (50, 20), True, 0.85)
         
-        self.copyright = Fonts.get_font("oswald", 15).render(cfg.TEXT_COPYRIGHT, True, cfg.COLOR_GRAY1)
+        self.copyright = ui_elements.UI_Text(cfg.TEXT_COPYRIGHT, "oswald", 1.25, cfg.COLOR_GRAY1, (87.5, 97))
 
     def set_ork_file(self):
         self.orkFile = open_ork_file()
@@ -87,6 +87,7 @@ class Top:
         # self.settings_message.update()
         self.title.update()
         self.oepn_file_text.update()
+        self.copyright.update()
         
         for event in pg.event.get():
             if event.type == pg.QUIT:
@@ -105,7 +106,7 @@ class Top:
         self.oepn_file_text.draw(scene)
         self.title.draw(scene)
 
-        scene.blit(self.copyright, (screen_width - self.copyright.get_width(), screen_height - self.copyright.get_height()))
+        self.copyright.draw(scene)
         
         pg.display.update()
         return SCENE_STATE.TOP

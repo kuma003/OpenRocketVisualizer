@@ -5,8 +5,7 @@ import src.scene as scene
 if __name__ == "__main__":
     app = scene.AppMain()
     app.run()
-    
-    
+
 
 # pygame.init()
 # screen = pygame.display.set_mode((600, 400))
@@ -36,14 +35,14 @@ if __name__ == "__main__":
 
 #     # read file
 #     doc = orh.load_doc('simple.ork')
-#     sim = doc.getSimulation(0)   
+#     sim = doc.getSimulation(0)
 #     opts = sim.getOptions()
 #     rocket = opts.getRocket()
-    
+
 #     fin = orh.get_component_named(rocket, "Trapezoidal fin set")
 #     print(fin.getName())
-    
-    
+
+
 #     for component in JIterator(rocket):
 #         pprint.pprint(component.__class__)
 

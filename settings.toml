@@ -1,0 +1,11 @@
+[Game]
+# maximum altitude for drawing the background image (unit: m)
+maxAltitude=100
+
+[openrocket]
+# Download URL for OpenRocket
+# If the jar file does not exist in the root directory, it will be downloaded from this URL
+# Please refer to the orhelper documentation and select an appropriate version from the OpenRocket repository
+# (see also: https://github.com/openrocket/openrocket/releases)
+url="https://github.com/openrocket/openrocket/releases/download/release-23.09/OpenRocket-23.09.jar"
+

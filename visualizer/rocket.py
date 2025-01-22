@@ -4,10 +4,12 @@ import pygame as pg
 import numpy as np
 from pathlib import Path
 import orhelper
+from orhelper import FlightEvent, FlightDataType, OrLogLevel
 import os
 import glob
 import tomllib
 import requests
+import pprint
 
 
 def import_ork_file(path: str):
@@ -37,12 +39,39 @@ def import_ork_file(path: str):
                     f.write(response.content)
             print("Done.")
 
-    with orhelper.OpenRocketInstance(jar_path) as instance:
+    with orhelper.OpenRocketInstance(jar_path, OrLogLevel.OFF) as instance:
         orh = orhelper.Helper(instance)
 
         # read file
         doc = orh.load_doc(path)
-        sim = doc.getSimulation(0)
+
         opts = sim.getOptions()
 
+        pprint.pprint(doc)
+        pprint.pprint(sim)
+        pprint.pprint(opts)
         return doc
+
+
+class Rocket:
+    def __init__(self, doc: dict):
+        self.doc = doc
+        try:
+            sim = doc.getSimulation(0)
+        except:
+            print(
+                "Error: No simulation found. Add a simulation in the OpenRocket Software."
+            )
+            exit(1)  # terminate program
+
+        self.opts = self.sim.getOptions()
+        self.rocket = self.sim.getRocket()
+
+    def run_simulation(self):
+        """
+        Run the simulation.
+        """
+
+
+if __name__ == "__main__":
+    doc: dict = import_ork_file("simple.ork")

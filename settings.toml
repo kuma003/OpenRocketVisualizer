@@ -1,6 +1,15 @@
-[Game]
+[game]
 # maximum altitude for drawing the background image (unit: m)
 maxAltitude=100
+
+[simulation]
+# launch rod angle from vertical (unit: degrees)
+launchRod.angle=90
+# launch rod length (unit: m)
+launchRod.length=1.5
+# wind speed (unit: m/s)
+windspeed=0
+
 
 [openrocket]
 # Download URL for OpenRocket

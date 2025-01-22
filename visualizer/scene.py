@@ -1,13 +1,12 @@
 """scenel.py"""
 
-import tkinter.filedialog
 import pygame as pg
 import numpy as np
 import enum
 from visualizer.fonts import Fonts
 import visualizer.ui_elements as ui_elements
 import visualizer.config as cfg
-import tkinter.filedialog
+from visualizer.dialogs import open_ork_file, ask_whether_to_exit
 
 pg.init()
 
@@ -44,10 +43,18 @@ class AppMain:
         clock.tick(fps)
         while True:
             # main loop
-            if self.scene_flag is SCENE_STATE.TOP:
-                self.scene_flag = self.top.exec(self.screen)
-            else:
-                break
+            match self.scene_flag:
+                case SCENE_STATE.TOP:
+                    self.scene_flag = self.top.exec(self.screen)
+                case SCENE_STATE.BRIEFING:
+                    self.scene_flag = self.breefing.exec(self.screen)
+                case SCENE_STATE.GAME:
+                    self.scene_flag = self.game.exec(self.screen)
+                case SCENE_STATE.QUIT:
+                    break
+                case _:
+                    break
+        pg.quit()
 
 
 class Top:
@@ -101,6 +108,17 @@ class Top:
         if self.orkFile:
             return SCENE_STATE.BRIEFING
 
+        for event in pg.event.get():
+            if event.type == pg.QUIT:
+                if ask_whether_to_exit():
+                    return SCENE_STATE.QUIT
+            if event.type == pg.KEYDOWN:
+                if event.key == pg.K_ESCAPE:
+                    if ask_whether_to_exit():
+                        return SCENE_STATE.QUIT
+            self.settings_button.event_handler(event=event)
+            self.oepn_file_text.event_handler(event)
+
         # fill the screen background
         scene.fill(cfg.COLOR_PALE_WHITE1)
 
@@ -111,15 +129,6 @@ class Top:
         self.title.update()
         self.oepn_file_text.update()
         self.copyright.update()
-
-        for event in pg.event.get():
-            if event.type == pg.QUIT:
-                return SCENE_STATE.QUIT
-            if event.type == pg.KEYDOWN:
-                if event.key == pg.K_ESCAPE:
-                    return SCENE_STATE.QUIT
-            self.settings_button.event_handler(event)
-            self.oepn_file_text.event_handler(event)
 
         # draw
         self.FTE_icon.draw(scene)
@@ -132,17 +141,3 @@ class Top:
 
         pg.display.update()
         return SCENE_STATE.TOP
-
-
-def open_ork_file():
-    """Open file dialog and return the file name"""
-    top = tkinter.Tk()
-    top.withdraw()  # hide window
-    file_name = tkinter.filedialog.askopenfilename(
-        parent=top, filetypes=[("OpenRocket Files", "*.ork")]
-    )
-    top.destroy()
-    # NOTE: Clear event queue to avoid double file open event occurred(ad hoc). That is why other event (e.g. QUIT) does not work.
-    pg.event.clear()
-    print(f"Open file: {file_name}")
-    return file_name

@@ -161,6 +161,8 @@ class Briefing:
         self.state: SCENE_STATE = SCENE_STATE.BRIEFING
         self.rocket = None
 
+        self.time = 0
+
     def run_simulation(self, ork_file: os.PathLike):
         """
         Set the ork file data and run simulaition.
@@ -188,21 +190,11 @@ class Briefing:
         # fill the screen background
         scene.fill(cfg.COLOR_PALE_WHITE1)
 
-        self.rocket.update()
+        t = pg.time.get_ticks() / 1000.0
+
+        self.rocket.update(t * 720, 15, 0)
         self.rocket.draw(scene)
 
-        # pg.draw.polygon(
-        #     scene,
-        #     cfg.COLOR_PALE_GRAY,
-        #     np.array(
-        #         [
-        #             np.array([0, 0]),
-        #             np.array([0, 100]),
-        #             np.array([100, 200]),
-        #             np.array([100, 0]),
-        #         ]
-        #     ),
-        # )
-
         pg.display.update()
+
         return self.state

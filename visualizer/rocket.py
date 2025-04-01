@@ -80,8 +80,6 @@ class Rocket:
         self.nose: Nose = None
         self.bodys: list[Body] = []
 
-        self.angle = 0  # angle of the rocket
-
         self.drawing_positon = [0.5, 0.5]  # position of the rocket(percentage)
         self.drawing_size = 0.8  # size of the rocket vs. window height(percentage)
 
@@ -135,7 +133,7 @@ class Rocket:
             ### get rocket structure ###
 
             self.length = rocket.getLength()  # total length of the rocket
-            half_length = self.length / 2  # half length of the rocket
+
             self.dry_mass = rocket.getMass()  # mass without propellant
 
             sustainer = rocket.getChild(0)
@@ -188,24 +186,30 @@ class Rocket:
                         )
                     )
 
-    def update(self):
+    def update(self, roll: float, pitch: float, yaw: float):
         """
         Update the rocket for drawing.
         """
+        roll = np.radians(roll)
+        pitch = np.radians(pitch)
+        yaw = np.radians(yaw)
+
         window_size = pg.display.get_window_size()
-        scale_factor = window_size[1] / self.length * self.drawing_size  # scale factor
-        # self.angle = np.radians(30)
+        scale_factor = (
+            window_size[1] / self.length * self.drawing_size * np.cos(yaw)
+        )  # scale factor
+
         rotation_matrix = np.array(
             [
-                [np.cos(self.angle), -np.sin(self.angle)],
-                [np.sin(self.angle), np.cos(self.angle)],
+                [np.cos(pitch), -np.sin(pitch)],
+                [np.sin(pitch), np.cos(pitch)],
             ]
         )
         pos = np.array(window_size) // 2
         self.nose.update(pos, scale_factor, rotation_matrix)
         for body in self.bodys:
             # body.update()
-            body.update(pos, scale_factor, rotation_matrix, 0)
+            body.update(pos, scale_factor, rotation_matrix, roll)
 
     def draw(self, screen: pg.surface):
         """
@@ -364,8 +368,6 @@ class Fin:
 
         self.shape = shape
         self.n_fin = n_fins
-        # max y coordinate (include body radius)
-        # self.__height = max([point[1] for point in self.shape]) + self.start_point[1]
 
         self.points = [point[::-1] + offset for point in shape]
         print(self.points)
@@ -388,7 +390,7 @@ class Fin:
             rotateion_matrix (np.ndarray): rotation matrix for the fin. must be 2x2 matrix.
             beta (float): roll angle for the fin(degrees).
         """
-        points = [np.dot(rotation_matrix, point) for point in self.points]
+        # points = [np.dot(rotation_matrix, point) for point in self.points]
 
         # polygon = [point * scale_factor + pos for point in points]
 
@@ -397,10 +399,15 @@ class Fin:
 
         self.polygons = [
             [
-                point * np.array([np.cos(diff * i + beta), 1]) * scale_factor + pos
-                for point in points
+                np.dot(rotation_matrix, point * np.array([np.cos(diff * i + beta), 1]))
+                * scale_factor
+                + pos
+                for point in self.points
             ]
             for i in range(self.n_fin)
+        ]
+        self.z_order = [
+            diff * i + beta % (2 * np.pi) <= np.pi for i in range(self.n_fin)
         ]
 
     def draw_backward(self, screen: pg.surface):
@@ -411,8 +418,8 @@ class Fin:
         Args:
             screen (pg.surface): screen to draw the fin.
         """
-        for polygon in self.polygons:
-            if polygon[0][0] < 0:
+        for polygon, z_order in zip(self.polygons, self.z_order):
+            if not z_order:
                 pg.draw.polygon(screen, pg.Color("blue"), polygon)
                 pg.draw.polygon(screen, pg.Color("black"), polygon, width=1)
 
@@ -424,8 +431,8 @@ class Fin:
         Args:
             screen (pg.surface): screen to draw the fin.
         """
-        for polygon in self.polygons:
-            if polygon[0][0] >= 0:
+        for polygon, z_order in zip(self.polygons, self.z_order):
+            if z_order:
                 pg.draw.polygon(screen, pg.Color("blue"), polygon)
                 pg.draw.polygon(screen, pg.Color("black"), polygon, width=1)
 

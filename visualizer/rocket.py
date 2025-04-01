@@ -186,9 +186,15 @@ class Rocket:
                         )
                     )
 
-    def update(self, roll: float, pitch: float, yaw: float):
+    def update(self, pos: np.ndarray, roll: float, pitch: float, yaw: float):
         """
         Update the rocket for drawing.
+
+        Args:
+            pos (np.ndarray): position of the center of the whole rocket in percentage relative to the window size.
+            roll (float): roll angle(degrees).
+            pitch (float): pitch angle(degrees).
+            yaw (float): yaw angle(degrees).
         """
         roll = np.radians(roll)
         pitch = np.radians(pitch)
@@ -205,7 +211,7 @@ class Rocket:
                 [np.sin(pitch), np.cos(pitch)],
             ]
         )
-        pos = np.array(window_size) // 2
+        pos = np.array(window_size) * pos  # convert to pixcel
         self.nose.update(pos, scale_factor, rotation_matrix)
         for body in self.bodys:
             # body.update()
@@ -218,11 +224,26 @@ class Rocket:
         Args:
             screen (pg.surface): screen to draw the rocket.
         """
+        # Returns:
+        #     pg.Rect: bounding box of the rocket.
+
         self.nose.draw(screen)
         for body in self.bodys:
             body.draw(screen)
 
-        pass
+        # x_points = [point[0] for body in self.bodys for point in body.polygons] + [
+        #     point[0] for point in self.nose.polygon
+        # ]
+        # y_points = [point[1] for body in self.bodys for point in body.polygons] + [
+        #     point[1] for point in self.nose.polygon
+        # ]
+
+        # x_min = min(x_points)
+        # x_max = max(x_points)
+        # y_min = min(y_points)
+        # y_max = max(y_points)
+
+        # return pg.Rect(x_min, y_min, x_max - x_min, y_max - y_min)
 
 
 class Nose:
@@ -276,7 +297,8 @@ class Nose:
         Args:
             screen (pg.surface): screen to draw the nose cone.
         """
-        pg.draw.polygon(screen, pg.Color("black"), self.polygon)
+        pg.draw.polygon(screen, pg.Color("white"), self.polygon)
+        pg.draw.polygon(screen, pg.Color("black"), self.polygon, width=1)
 
 
 class Body:
@@ -336,7 +358,8 @@ class Body:
         """
         for fin in self.fins:
             fin.draw_backward(screen)
-        pg.draw.polygon(screen, pg.Color("black"), self.polygons)
+        pg.draw.polygon(screen, pg.Color("white"), self.polygons)
+        pg.draw.polygon(screen, pg.Color("black"), self.polygons, width=1)
         for fin in self.fins:
             fin.draw_forward(screen)
 
@@ -373,6 +396,7 @@ class Fin:
         print(self.points)
 
         self.polygons = []
+        self.z_order = []
 
     def update(
         self,
@@ -407,8 +431,8 @@ class Fin:
             for i in range(self.n_fin)
         ]
         self.z_order = [
-            diff * i + beta % (2 * np.pi) <= np.pi for i in range(self.n_fin)
-        ]
+            (diff * i + beta) % (2 * np.pi) <= np.pi for i in range(self.n_fin)
+        ]  # True: forward, False: backward
 
     def draw_backward(self, screen: pg.surface):
         """

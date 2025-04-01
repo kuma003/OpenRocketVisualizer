@@ -192,7 +192,7 @@ class Briefing:
 
         t = pg.time.get_ticks() / 1000.0
 
-        self.rocket.update(t * 720, 15, 0)
+        self.rocket.update(np.array([0.2, 0.5]), t * 720, 15, 0)
         self.rocket.draw(scene)
 
         pg.display.update()

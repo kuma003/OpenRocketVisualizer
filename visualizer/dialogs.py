@@ -2,6 +2,7 @@
 
 import tkinter
 import tkinter.filedialog
+
 import pygame as pg
 
 
@@ -15,7 +16,6 @@ def open_ork_file():
     top.destroy()
     # NOTE: Clear event queue to avoid double file open event occurred(ad hoc). That is why other event (e.g. QUIT) does not work.
     pg.event.clear()
-    print(f"Open file: {file_name}")
     return file_name
 
 

@@ -1,6 +1,8 @@
-from visualizer import rocket
 from pathlib import Path
+
 import pytest
+
+from visualizer import rocket
 
 
 @pytest.mark.parametrize("path", ["simple.ork"])

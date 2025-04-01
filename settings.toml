@@ -4,12 +4,17 @@ maxAltitude=100
 
 [simulation]
 # launch rod angle from vertical (unit: degrees)
-launchRod.angle=90
+launchRod.angle=80
 # launch rod length (unit: m)
-launchRod.length=1.5
+launchRod.length=0.50
 # wind speed (unit: m/s)
-windspeed=0
-
+wind.speed=0
+# wind deviation (unit: m/s)
+wind.deviation = 0
+# wind turbulence intensity (unit: %(decimal))
+wind.turbulenceIntensity = 0
+# wind direction (unit: degrees, 0 = from north, 90 = from east)
+wind.direction = 90
 
 [openrocket]
 # Download URL for OpenRocket

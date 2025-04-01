@@ -1,8 +1,9 @@
 """font.py"""
 
-import requests
 import os
+
 import pygame as pg
+import requests
 
 
 class Fonts:

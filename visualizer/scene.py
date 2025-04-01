@@ -1,12 +1,16 @@
 """scenel.py"""
 
-import pygame as pg
-import numpy as np
 import enum
-from visualizer.fonts import Fonts
-import visualizer.ui_elements as ui_elements
+from pathlib import Path
+
+import numpy as np
+import pygame as pg
+
 import visualizer.config as cfg
-from visualizer.dialogs import open_ork_file, ask_whether_to_exit
+import visualizer.ui_elements as ui_elements
+from visualizer.dialogs import ask_whether_to_exit, open_ork_file
+from visualizer.fonts import Fonts
+from visualizer.rocket import *
 
 pg.init()
 
@@ -33,6 +37,7 @@ class AppMain:
         pg.display.set_caption("F.T.E. OpenRocket Visualizer")
         pg.display.set_icon(pg.image.load("img/ろけにゃん_ロケット.png"))
         self.top = Top()
+        self.briefing = Briefing()
 
         self.scene_flag = SCENE_STATE.TOP
 
@@ -46,8 +51,12 @@ class AppMain:
             match self.scene_flag:
                 case SCENE_STATE.TOP:
                     self.scene_flag = self.top.exec(self.screen)
+                    if (
+                        self.scene_flag == SCENE_STATE.BRIEFING
+                    ):  # if the scene is changed to BRIEFING, run the simulation
+                        self.briefing.run_simulation(self.top.ork_file)
                 case SCENE_STATE.BRIEFING:
-                    self.scene_flag = self.breefing.exec(self.screen)
+                    self.scene_flag = self.briefing.exec(self.screen)
                 case SCENE_STATE.GAME:
                     self.scene_flag = self.game.exec(self.screen)
                 case SCENE_STATE.QUIT:
@@ -63,7 +72,9 @@ class Top:
     """
 
     def __init__(self) -> None:
-        self.orkFile: str = ""
+        self.ork_file: Path = Path("")
+        self.state: SCENE_STATE = SCENE_STATE.TOP
+
         self.FTE_icon = ui_elements.BackgruondLogo()
         self.settings_button = ui_elements.Button(
             ui_elements.load_transparent_img("img/settings.png", cfg.COLOR_GRAY1),
@@ -83,7 +94,7 @@ class Top:
             True,
             debug_collision_rect=True,
         )
-        self.oepn_file_text.set_callback(open_ork_file)
+        self.oepn_file_text.set_callback(lambda: self.set_ork_file())
         self.title = ui_elements.UI_Text(
             "From The Earth\nOpenRocket Visualizer",
             "oswald",
@@ -99,23 +110,24 @@ class Top:
         )
 
     def set_ork_file(self):
-        self.orkFile = open_ork_file()
+        self.ork_file = Path(open_ork_file())
+        if self.ork_file.exists() and self.ork_file.suffix == ".ork":
+            print(f"Open file: {self.ork_file}")
+            self.state = SCENE_STATE.BRIEFING  # next scene
 
     def exec(self, scene: pg.surface) -> None:
         """
         Execute the scene.
         """
-        if self.orkFile:
-            return SCENE_STATE.BRIEFING
 
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 if ask_whether_to_exit():
-                    return SCENE_STATE.QUIT
+                    self.state = SCENE_STATE.EXIT
             if event.type == pg.KEYDOWN:
                 if event.key == pg.K_ESCAPE:
                     if ask_whether_to_exit():
-                        return SCENE_STATE.QUIT
+                        self.state = SCENE_STATE.EXIT
             self.settings_button.event_handler(event=event)
             self.oepn_file_text.event_handler(event)
 
@@ -140,4 +152,57 @@ class Top:
         self.copyright.draw(scene)
 
         pg.display.update()
-        return SCENE_STATE.TOP
+        return self.state
+
+
+class Briefing:
+
+    def __init__(self) -> None:
+        self.state: SCENE_STATE = SCENE_STATE.BRIEFING
+        self.rocket = None
+
+    def run_simulation(self, ork_file: os.PathLike):
+        """
+        Set the ork file data and run simulaition.
+
+        Args:
+            ork_file (os.PathLike): path to the ork file.
+        """
+        self.rocket = Rocket(ork_file)
+        self.rocket.run_simulation()
+
+    def exec(self, scene: pg.surface) -> None:
+        """
+        Execute the scene.
+        """
+
+        for event in pg.event.get():
+            if event.type == pg.QUIT:
+                if ask_whether_to_exit():
+                    self.state = SCENE_STATE.EXIT
+            if event.type == pg.KEYDOWN:
+                if event.key == pg.K_ESCAPE:
+                    if ask_whether_to_exit():
+                        self.state = SCENE_STATE.EXIT
+
+        # fill the screen background
+        scene.fill(cfg.COLOR_PALE_WHITE1)
+
+        self.rocket.update()
+        self.rocket.draw(scene)
+
+        # pg.draw.polygon(
+        #     scene,
+        #     cfg.COLOR_PALE_GRAY,
+        #     np.array(
+        #         [
+        #             np.array([0, 0]),
+        #             np.array([0, 100]),
+        #             np.array([100, 200]),
+        #             np.array([100, 0]),
+        #         ]
+        #     ),
+        # )
+
+        pg.display.update()
+        return self.state

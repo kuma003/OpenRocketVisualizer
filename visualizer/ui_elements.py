@@ -1,9 +1,10 @@
 """ui_elements.py"""
 
-import pygame as pg
 import numpy as np
-from visualizer.fonts import Fonts
+import pygame as pg
+
 import visualizer.config as cfg
+from visualizer.fonts import Fonts
 
 
 def load_transparent_img(filename: str, filled_color: pg.Color) -> pg.Surface:

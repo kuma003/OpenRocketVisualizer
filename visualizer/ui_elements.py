@@ -54,12 +54,19 @@ class BackgruondLogo:
                 self.image = pg.transform.scale(
                     self.row_image, (self.window_size[0], self.window_size[0])
                 )
-                self.blit_dest = (0, (self.window_size[1] - self.window_size[0]) // 2)
+                self.blit_dest = (
+                    0,
+                    (self.window_size[1] - self.window_size[0]) // 2
+                    + self.window_size * 0.05,  # shift the image down a bit
+                )
             else:
                 self.image = pg.transform.scale(
                     self.row_image, (self.window_size[1], self.window_size[1])
                 )
-                self.blit_dest = ((self.window_size[0] - self.window_size[1]) // 2, 0)
+                self.blit_dest = (
+                    (self.window_size[0] - self.window_size[1]) // 2,
+                    self.window_size[1] * 0.05,
+                )
 
     def draw(self, screen: pg.Surface) -> None:
         """Draw image on screen"""
@@ -136,6 +143,9 @@ class UI_Text(pg.sprite.Sprite):
         pos: tuple[float, float],
         centering: bool = False,
         line_height: float = 1.0,
+        underline: bool = False,
+        underline_width: int = 2,
+        underline_color: pg.Color | None = None,
         debug_collision_rect: bool = False,
     ) -> None:
         """
@@ -164,6 +174,9 @@ class UI_Text(pg.sprite.Sprite):
         self.on_click: callable = lambda: None
         self.centering: bool = centering
         self.line_height: float = line_height
+        self.underline: bool = underline
+        self.underline_width: int = underline_width
+        self.underline_color: pg.Color = underline_color or font_color
         self.debug_collision_rect: bool = debug_collision_rect
 
     def set_callback(self, callback) -> None:
@@ -218,5 +231,16 @@ class UI_Text(pg.sprite.Sprite):
         if self.debug_collision_rect:
             for rect in self.rects:
                 pg.draw.rect(screen, pg.Color("red"), rect, 2)
+        if self.underline:
+            pg.draw.line(
+                screen,
+                self.underline_color,
+                (self.rects[0].x, self.rects[0].y + self.rects[0].height),
+                (
+                    self.rects[-1].x + self.rects[-1].width,
+                    self.rects[-1].y + self.rects[-1].height,
+                ),
+                self.underline_width,
+            )
         for text, rect in zip(self.rendered_text, self.rects):
             screen.blit(text, rect)

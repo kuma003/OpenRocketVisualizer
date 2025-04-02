@@ -83,6 +83,12 @@ class Rocket:
         self.drawing_positon = [0.5, 0.5]  # position of the rocket(percentage)
         self.drawing_size = 0.8  # size of the rocket vs. window height(percentage)
 
+        self.max_altitude = 0
+        self.max_velocity = 0
+        self.flight_time = 0
+        self.launch_clear_velocity = 0
+        self.dry_mass = 0
+
     def run_simulation(self):
         """
         Run the simulation.
@@ -121,20 +127,21 @@ class Rocket:
 
             orh.run_simulation(sim)  # run simulation
             sim_data = sim.getSimulatedData()
-            print("launch clear vel: ", sim_data.getLaunchRodVelocity())
-            print("max altitude: ", sim_data.getMaxAltitude())
-            print("max velocity: ", sim_data.getMaxVelocity())
-            print("flight time: ", sim_data.getFlightTime())
+            self.max_altitude = sim_data.getMaxAltitude()
+            self.max_velocity = sim_data.getMaxVelocity()
+            self.flight_time = sim_data.getFlightTime()
+            self.launch_clear_velocity = sim_data.getLaunchRodVelocity()
 
             self.flight_data = orh.get_timeseries(
                 sim, self.FLIGHT_DATA
             )  # get timeseries data
 
             ### get rocket structure ###
+            self.dry_mass = 0  # dry mass of the rocket
 
             self.length = rocket.getLength()  # total length of the rocket
 
-            self.dry_mass = rocket.getMass()  # mass without propellant
+            # sim_config = sim.getActiveConfiguration()
 
             sustainer = rocket.getChild(0)
 
@@ -147,6 +154,7 @@ class Rocket:
             # in the most of the cases, the first child is the nose cone
             nose = sustainer.getChild(0)
             nose_cone_length = nose.getLength()
+            self.dry_mass += nose.getMass()  # add nose cone mass
             radius = [
                 nose.getRadius(nose_cone_length / self.NOSE_CONE_DETAIL * i)
                 for i in range(0, self.NOSE_CONE_DETAIL + 1)
@@ -155,8 +163,6 @@ class Rocket:
 
             # verify all of the body tubes
             for i in range(1, sustainer.getChildCount()):
-                for coord in sustainer.getChild(i).getLocations():
-                    print(coord)
                 body = sustainer.getChild(i)
                 body_positon = np.array([body.getPosition().x, body.getPosition().y])
                 self.bodys.append(
@@ -167,7 +173,15 @@ class Rocket:
                         self.length,
                     )
                 )
+                self.radius = body.getOuterRadius()
+                self.dry_mass += body.getMass()
+                print("body mass: ", body.getMass())
                 for component in body.getChildren():
+                    self.dry_mass += component.getMass()
+                    for temp in component.getChildren():
+                        self.dry_mass += (
+                            temp.getMass()
+                        )  # if there are more than 2 levels of components
                     if not "FinSet" in type(component).__name__:  # not a fin
                         continue
 
@@ -185,6 +199,8 @@ class Rocket:
                             self.length,
                         )
                     )
+        jpype.shutdownJVM()
+        print(self.dry_mass)
 
     def update(self, pos: np.ndarray, roll: float, pitch: float, yaw: float):
         """
@@ -297,7 +313,7 @@ class Nose:
         Args:
             screen (pg.surface): screen to draw the nose cone.
         """
-        pg.draw.polygon(screen, pg.Color("white"), self.polygon)
+        pg.draw.polygon(screen, pg.Color("orange"), self.polygon)
         pg.draw.polygon(screen, pg.Color("black"), self.polygon, width=1)
 
 
@@ -385,15 +401,11 @@ class Fin:
         start_point = start_point[::-1]  # convert as longitudinal axis is y-axis
         parents_position = parents_position[::-1]
         offset = start_point - np.array([0, total_length / 2])
-        print("offset: ", offset)
-        print("start_point: ", start_point)
-        print("parents_position: ", parents_position)
 
         self.shape = shape
         self.n_fin = n_fins
 
         self.points = [point[::-1] + offset for point in shape]
-        print(self.points)
 
         self.polygons = []
         self.z_order = []

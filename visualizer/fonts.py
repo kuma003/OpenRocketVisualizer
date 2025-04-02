@@ -17,6 +17,7 @@ class Fonts:
     font_list = {
         "ZenKakuGothic": "https://github.com/googlefonts/zen-kakugothic/raw/refs/heads/main/fonts/ttf/ZenKakuGothicAntique-Medium.ttf",
         "oswald": "https://github.com/vernnobile/OswaldFont/raw/refs/heads/master/3.0/Roman/400/Oswald-Regular.ttf",
+        "sawarabi": "https://github.com/google/fonts/raw/refs/heads/main/ofl/sawarabigothic/SawarabiGothic-Regular.ttf",
     }
 
     __FONT_DIR = "./fonts"

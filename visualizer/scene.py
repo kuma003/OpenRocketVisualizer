@@ -57,6 +57,8 @@ class AppMain:
                         self.briefing.run_simulation(self.top.ork_file)
                 case SCENE_STATE.BRIEFING:
                     self.scene_flag = self.briefing.exec(self.screen)
+                    if self.scene_flag == SCENE_STATE.TOP:
+                        self.top.state = SCENE_STATE.TOP
                 case SCENE_STATE.GAME:
                     self.scene_flag = self.game.exec(self.screen)
                 case SCENE_STATE.QUIT:
@@ -86,13 +88,13 @@ class Top:
         # self.settings_message.set_callback(lambda : print("Configurations"))
 
         self.oepn_file_text = ui_elements.UI_Text(
-            "orkファイルを開く | Open ork File",
-            "ZenKakuGothic",
+            "  orkファイルを開く | Open ork File  ",
+            "sawarabi",
             3.75,
             cfg.COLOR_BLACK,
             (50, 75),
             True,
-            debug_collision_rect=True,
+            underline=True,
         )
         self.oepn_file_text.set_callback(lambda: self.set_ork_file())
         self.title = ui_elements.UI_Text(
@@ -160,8 +162,8 @@ class Briefing:
     def __init__(self) -> None:
         self.state: SCENE_STATE = SCENE_STATE.BRIEFING
         self.rocket = None
-
-        self.time = 0
+        self.specification = None
+        self.spec_detail = None
 
     def run_simulation(self, ork_file: os.PathLike):
         """
@@ -172,6 +174,47 @@ class Briefing:
         """
         self.rocket = Rocket(ork_file)
         self.rocket.run_simulation()
+        self.rocket.drawing_size = 0.75
+        self.specification = ui_elements.UI_Text(
+            " 諸元 | Specification     ",
+            "sawarabi",
+            3.75,
+            cfg.COLOR_BLACK,
+            (45, 7.5),
+            underline=True,
+        )
+        spec_detail_text = f"""
+全長 | Length:  {self.rocket.length*100:.2f} cm
+直径 | Diameter:  {self.rocket.radius*200:.2f} cm
+重量 | Weight:  {self.rocket.dry_mass*1000:.2f} g
+"""
+        self.spec_detail = ui_elements.UI_Text(
+            spec_detail_text,
+            "sawarabi",
+            3.5,
+            cfg.COLOR_BLACK,
+            (50, 10),
+        )
+
+        self.FTE_icon = ui_elements.BackgruondLogo()
+        self.copyright = ui_elements.UI_Text(
+            cfg.TEXT_COPYRIGHT, "oswald", 1.25, cfg.COLOR_GRAY1, (87.5, 97)
+        )
+
+        self.back_icon = ui_elements.Button(
+            ui_elements.load_transparent_img("img/back.png", cfg.COLOR_GRAY1),
+            (0, 0),
+            4,
+        )
+        self.back_icon.set_callback(lambda: self.back_to_top())
+
+        self.back_icon_text = ui_elements.UI_Text(
+            "戻る | Back", "sawarabi", 3, cfg.COLOR_GRAY1, (4, 0)
+        )
+        self.back_icon_text.set_callback(lambda: self.back_to_top())
+
+    def back_to_top(self):
+        self.state = SCENE_STATE.TOP
 
     def exec(self, scene: pg.surface) -> None:
         """
@@ -186,14 +229,34 @@ class Briefing:
                 if event.key == pg.K_ESCAPE:
                     if ask_whether_to_exit():
                         self.state = SCENE_STATE.EXIT
+            self.back_icon.event_handler(event)
+            self.back_icon_text.event_handler(event)
 
         # fill the screen background
         scene.fill(cfg.COLOR_PALE_WHITE1)
 
+        self.FTE_icon.update()
+        self.FTE_icon.draw(scene)
+
+        self.copyright.update()
+        self.copyright.draw(scene)
+
+        self.back_icon.update()
+        self.back_icon.draw(scene)
+
+        self.back_icon_text.update()
+        self.back_icon_text.draw(scene)
+
         t = pg.time.get_ticks() / 1000.0
 
-        self.rocket.update(np.array([0.2, 0.5]), t * 720, 15, 0)
+        self.rocket.update(np.array([0.2, 0.5]), t * 360 * 3, 15, 0)
         self.rocket.draw(scene)
+
+        self.specification.update()
+        self.specification.draw(scene)
+
+        self.spec_detail.update()
+        self.spec_detail.draw(scene)
 
         pg.display.update()
 

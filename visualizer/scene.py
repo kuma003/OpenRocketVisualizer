@@ -89,7 +89,7 @@ class Top:
 
         self.oepn_file_text = ui_elements.UI_Text(
             "  orkファイルを開く | Open ork File  ",
-            "sawarabi",
+            "r_Mplus_medium",
             3.75,
             cfg.COLOR_BLACK,
             (50, 75),
@@ -176,24 +176,45 @@ class Briefing:
         self.rocket.run_simulation()
         self.rocket.drawing_size = 0.75
         self.specification = ui_elements.UI_Text(
-            " 諸元 | Specification     ",
-            "sawarabi",
+            " 諸元 | Specification                          ",
+            "r_Mplus_medium",
             3.75,
             cfg.COLOR_BLACK,
-            (45, 7.5),
+            (40, 7.5),
             underline=True,
         )
         spec_detail_text = f"""
-全長 | Length:  {self.rocket.length*100:.2f} cm
-直径 | Diameter:  {self.rocket.radius*200:.2f} cm
+全長 | Length:  {self.rocket.length*100:.1f} cm
+直径 | Diameter:  {self.rocket.radius*2000:.1f} cm
 重量 | Weight:  {self.rocket.dry_mass*1000:.2f} g
 """
         self.spec_detail = ui_elements.UI_Text(
             spec_detail_text,
-            "sawarabi",
+            "r_Mplus_regular",
             3.5,
             cfg.COLOR_BLACK,
-            (50, 10),
+            (42.5, 10),
+        )
+
+        self.flight_profile = ui_elements.UI_Text(
+            " 飛行プロファイル | Flight Profile        ",
+            "r_Mplus_medium",
+            3.75,
+            cfg.COLOR_BLACK,
+            (40, 50),
+            underline=True,
+        )
+        flight_profile_text = f"""
+飛行時間 | Flight Time:  {self.rocket.flight_time:.1f} s
+最高高度 | Max Altitude:  {self.rocket.max_altitude:.1f} m
+最高速度 | Max Velocity:  {self.rocket.max_velocity:.1f} m/s
+"""
+        self.flight_profile_detail = ui_elements.UI_Text(
+            flight_profile_text,
+            "r_Mplus_regular",
+            3.5,
+            cfg.COLOR_BLACK,
+            (42.5, 52.5),
         )
 
         self.FTE_icon = ui_elements.BackgruondLogo()
@@ -209,7 +230,7 @@ class Briefing:
         self.back_icon.set_callback(lambda: self.back_to_top())
 
         self.back_icon_text = ui_elements.UI_Text(
-            "戻る | Back", "sawarabi", 3, cfg.COLOR_GRAY1, (4, 0)
+            "戻る | Back", "r_Mplus_regular", 3, cfg.COLOR_GRAY1, (4, 0)
         )
         self.back_icon_text.set_callback(lambda: self.back_to_top())
 
@@ -229,6 +250,10 @@ class Briefing:
                 if event.key == pg.K_ESCAPE:
                     if ask_whether_to_exit():
                         self.state = SCENE_STATE.EXIT
+                if event.key == pg.K_BACKSPACE:
+                    self.state = SCENE_STATE.TOP
+                if event.key == pg.K_RETURN:
+                    self.state = SCENE_STATE.GAME
             self.back_icon.event_handler(event)
             self.back_icon_text.event_handler(event)
 
@@ -257,6 +282,12 @@ class Briefing:
 
         self.spec_detail.update()
         self.spec_detail.draw(scene)
+
+        self.flight_profile.update()
+        self.flight_profile.draw(scene)
+
+        self.flight_profile_detail.update()
+        self.flight_profile_detail.draw(scene)
 
         pg.display.update()
 
